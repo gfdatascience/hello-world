@@ -1,0 +1,251 @@
+Public Function CallDelta( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    My_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+    
+    CallDelta = Exp(-DividendYield * Years) * (Application.WorksheetFunction.NormSDist(My_d1))
+    
+
+End Function
+
+
+Public Function PutDelta( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+    
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    My_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+    
+    PutDelta = Exp(-DividendYield * Years) * (Application.WorksheetFunction.NormSDist(My_d1) - 1)
+    
+
+End Function
+
+
+Public Function CallRho( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+    My_d2 = Option_d2( _
+        UnadjustedPrice, _
+        StrikePrice, _
+        Years, _
+        Volatility, _
+        RiskFreeRate, _
+        DividendYield _
+        )
+
+    CallRho = StrikePrice * Years * Exp(-RiskFreeRate * Years) * Application.WorksheetFunction.NormSDist(My_d2)
+    
+
+End Function
+
+
+Public Function PutRho( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+    My_d2 = Option_d2( _
+        UnadjustedPrice, _
+        StrikePrice, _
+        Years, _
+        Volatility, _
+        RiskFreeRate, _
+        DividendYield _
+        )
+
+    PutRho = -StrikePrice * Years * Exp(-RiskFreeRate * Years) * Application.WorksheetFunction.NormSDist(-My_d2)
+    
+End Function
+
+
+Public Function CallTheta( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    My_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+    
+    My_d2 = My_d1 - Volatility * (Years ^ 0.5)
+    
+    
+    Pi = Application.WorksheetFunction.Pi()
+ 
+        
+    My_Nd1 = 1 / ((2 * Pi) ^ 0.5) * Exp(-0.5 * My_d1 ^ 2)
+    
+   
+    CallTheta = -(UnadjustedPrice * My_Nd1 * Volatility * Exp(-DividendYield * Years)) / (2 * (Years ^ 0.5)) + DividendYield * UnadjustedPrice * Application.WorksheetFunction.NormSDist(My_d1) * Exp(-DividendYield * Years) - RiskFreeRate * StrikePrice * Exp(-RiskFreeRate * Years) * Application.WorksheetFunction.NormSDist(My_d2)
+
+End Function
+
+
+Public Function PutTheta( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    My_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+    
+    My_d2 = My_d1 - Volatility * (Years ^ 0.5)
+    
+    
+    Pi = Application.WorksheetFunction.Pi()
+ 
+        
+    My_Nd1 = 1 / ((2 * Pi) ^ 0.5) * Exp(-0.5 * My_d1 ^ 2)
+
+    PutTheta = -(UnadjustedPrice * My_Nd1 * Volatility * Exp(-DividendYield * Years)) / (2 * (Years ^ 0.5)) - DividendYield * UnadjustedPrice * Application.WorksheetFunction.NormSDist(-My_d1) * Exp(-DividendYield * Years) + RiskFreeRate * StrikePrice * Exp(-RiskFreeRate * Years) * Application.WorksheetFunction.NormSDist(-My_d2)
+
+End Function
+
+
+Public Function OptionGamma( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    My_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+    
+    Pi = Application.WorksheetFunction.Pi()
+        
+    My_Nd1 = 1 / ((2 * Pi) ^ 0.5) * Exp(-0.5 * My_d1 ^ 2)
+
+    OptionGamma = My_Nd1 * Exp(-DividendYield * Years) / (UnadjustedPrice * Volatility * (Years ^ 0.5))
+
+End Function
+
+
+Public Function OptionVega( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    My_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+    
+    Pi = Application.WorksheetFunction.Pi()
+        
+    My_Nd1 = 1 / ((2 * Pi) ^ 0.5) * Exp(-0.5 * My_d1 ^ 2)
+
+    OptionVega = UnadjustedPrice * (Years ^ 0.5) * My_Nd1 * Exp(-DividendYield * Years)
+
+End Function
+
+
+Public Function Option_d1( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+    
+
+    If DividendYield Then
+        MyAdjustedPrice = UnadjustedPrice * Exp(-DividendYield * Years)
+    Else
+        MyAdjustedPrice = UnadjustedPrice
+    End If
+    
+    Option_d1 = (Application.WorksheetFunction.Ln(MyAdjustedPrice / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)
+
+End Function
+
+
+Public Function Option_d2( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+
+
+
+Option_d2 = Option_d1( _
+    UnadjustedPrice, _
+    StrikePrice, _
+    Years, _
+    Volatility, _
+    RiskFreeRate, _
+    DividendYield _
+    ) _
+    - Volatility * Years ^ 0.5
+    
+End Function

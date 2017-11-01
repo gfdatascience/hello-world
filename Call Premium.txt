@@ -1,0 +1,63 @@
+Public Function CallPremium( _
+    UnadjustedPrice As Double, _
+    StrikePrice As Double, _
+    Years, _
+    Volatility As Double, _
+    RiskFreeRate, _
+    Optional DividendYield = 0 _
+    )
+    
+
+
+'Validate the input:
+If Not IsNumeric(Volatility) Then
+    CallPremium = CVErr(2015)
+    Exit Function
+ElseIf Not IsNumeric(Years) Then
+    CallPremium = CVErr(2015)
+    Exit Function
+ElseIf Not IsNumeric(UnadjustedPrice) Then
+    CallPremium = CVErr(2015)
+    Exit Function
+ElseIf Not IsNumeric(StrikePrice) Then
+    CallPremium = CVErr(2015)
+    Exit Function
+ElseIf Not IsNumeric(DividendYield) Then
+    CallPremium = CVErr(2015)
+    Exit Function
+ElseIf Not IsNumeric(RiskFreeRate) Then
+    CallPremium = CVErr(2015)
+    Exit Function
+ElseIf DividendYield < 0 Then
+    CallPremium = CVErr(2036)
+    Exit Function
+ElseIf Volatility < 0 Then
+    CallPremium = CVErr(2036)
+    Exit Function
+ElseIf Years < 0 Then
+    CallPremium = CVErr(2036)
+    Exit Function
+ElseIf UnadjustedPrice < 0 Then
+    CallPremium = CVErr(2036)
+    Exit Function
+ElseIf StrikePrice < 0 Then
+    CallPremium = CVErr(2036)
+    Exit Function
+ElseIf RiskFreeRate < 0 Then
+    CallPremium = CVErr(2036)
+    Exit Function
+End If
+
+
+
+'If there's no time left, the premium is equal to the difference
+'between strike price and underlying if in the money,
+'and equal to zero if out of the money:
+If Years = 0 Then
+    CallPremium = Application.WorksheetFunction.Max(0, UnadjustedPrice - StrikePrice)
+Else
+'Do the math:
+    CallPremium = (UnadjustedPrice * Exp(-DividendYield * Years)) * Application.WorksheetFunction.NormSDist((Application.WorksheetFunction.Ln((UnadjustedPrice * Exp(-DividendYield * Years)) / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5)) - StrikePrice * Exp(-RiskFreeRate * Years) * Application.WorksheetFunction.NormSDist((Application.WorksheetFunction.Ln((UnadjustedPrice * Exp(-DividendYield * Years)) / StrikePrice) + (RiskFreeRate + 0.5 * Volatility ^ 2) * Years) / (Volatility * Years ^ 0.5) - Volatility * Years ^ (0.5))
+End If
+
+End Function
